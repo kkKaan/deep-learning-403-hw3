@@ -23,23 +23,24 @@ As usual, let us import the modules that we will use.
 """
 
 # Commented out IPython magic to ensure Python compatibility.
-import matplotlib.pyplot as plt # For plotting
-import numpy as np              # NumPy, for working with arrays/tensors
-import os                       # Built-in library for filesystem access etc.
-import pickle                   # For (re)storing Python objects into (from) files
-import time                     # For measuring time
-import random                   # Python's random library
+import matplotlib.pyplot as plt  # For plotting
+import numpy as np  # NumPy, for working with arrays/tensors
+import os  # Built-in library for filesystem access etc.
+import pickle  # For (re)storing Python objects into (from) files
+import time  # For measuring time
+import random  # Python's random library
 
 # %matplotlib inline
 plt.rcParams['figure.figsize'] = [12, 8]
-plt.rcParams['figure.dpi'] = 100 # 200 e.g. is really fine, but slower
-
-"""## 1.2 Naive Implementation of Convolution
+plt.rcParams['figure.dpi'] = 100  # 200 e.g. is really fine, but slower
+"""
+## 1.2 Naive Implementation of Convolution
 
 Here, we will implement 2D convolution using only for/while loops; in other words, **NO** vector/matrix multiplications.
 
 ### 1.2.1 Convolution Feedforward
 """
+
 
 def conv_forward_naive(x, w, b, stride, padding):
     """
@@ -75,9 +76,9 @@ def conv_forward_naive(x, w, b, stride, padding):
 
     # Just to make sure
     if (H - FH + 2 * padding) % stride != 0:
-      return ValueError("Filters do not align horizontally")
+        return ValueError("Filters do not align horizontally")
     if (W - FW + 2 * padding) % stride != 0:
-      return ValueError("Filters do not align vertically")
+        return ValueError("Filters do not align vertically")
 
     ###########################################################################
     # TODO: Implement the convolutional forward pass. You cannot use          #
@@ -98,9 +99,11 @@ def conv_forward_naive(x, w, b, stride, padding):
     #                             END OF YOUR CODE                            #
     ###########################################################################
     cache = (x_pad, w, b, stride, padding)
-    return out,] cache
+    return out, cache
 
-"""### 1.2.2 Convolution Feedforward Check
+
+"""
+### 1.2.2 Convolution Feedforward Check
 
 Let us quickly check your implementation with some known values. Your output should differ by $\sim 10^{-8}$.
 """
@@ -114,31 +117,28 @@ b = np.linspace(-0.1, 0.2, num=3)
 stride = 2
 padding = 1
 out, _ = conv_forward_naive(x, w, b, stride, padding)
-correct_out = np.array([[[[-0.08759809, -0.10987781],
-                           [-0.18387192, -0.2109216 ]],
-                          [[ 0.21027089,  0.21661097],
-                           [ 0.22847626,  0.23004637]],
-                          [[ 0.50813986,  0.54309974],
-                           [ 0.64082444,  0.67101435]]],
-                         [[[-0.98053589, -1.03143541],
-                           [-1.19128892, -1.24695841]],
-                          [[ 0.69108355,  0.66880383],
-                           [ 0.59480972,  0.56776003]],
-                          [[ 2.36270298,  2.36904306],
-                           [ 2.38090835,  2.38247847]]]])
+correct_out = np.array([[[[-0.08759809, -0.10987781], [-0.18387192, -0.2109216]],
+                         [[0.21027089, 0.21661097], [0.22847626, 0.23004637]],
+                         [[0.50813986, 0.54309974], [0.64082444, 0.67101435]]],
+                        [[[-0.98053589, -1.03143541], [-1.19128892, -1.24695841]],
+                         [[0.69108355, 0.66880383], [0.59480972, 0.56776003]],
+                         [[2.36270298, 2.36904306], [2.38090835, 2.38247847]]]])
+
 
 def rel_error(x, y):
-  """ returns relative error """
-  return np.max(np.abs(x - y) / (np.maximum(1e-8, np.abs(x) + np.abs(y))))
+    """ returns relative error """
+    return np.max(np.abs(x - y) / (np.maximum(1e-8, np.abs(x) + np.abs(y))))
+
 
 # Compare your output to ours; difference should be around e-8
 print('Testing conv_forward_naive')
 print('difference: ', rel_error(out, correct_out))
-
-"""### 1.2.3 Convolution Gradient
+"""
+### 1.2.3 Convolution Gradient
 
 Now, let us implement the gradient. Again, you are **NOT** allowed to use any vector/matrix multiplication here.
 """
+
 
 def conv_backward_naive(dout, cache):
     """
@@ -164,10 +164,13 @@ def conv_backward_naive(dout, cache):
     ###########################################################################
     return dx, dw, db
 
-"""### 1.2.4 Convolution Gradient Check
+
+"""
+### 1.2.4 Convolution Gradient Check
 
 Let us check the gradient. You should see differences lower than $10^{-9}$.
 """
+
 
 def eval_numerical_gradient_array(f, x, df, h=1e-5):
     """
@@ -190,6 +193,7 @@ def eval_numerical_gradient_array(f, x, df, h=1e-5):
         it.iternext()
     return grad
 
+
 np.random.seed(231)
 x = np.random.randn(4, 3, 5, 5)
 w = np.random.randn(2, 3, 3, 3)
@@ -210,13 +214,14 @@ print('Testing conv_backward_naive function')
 print('dx error: ', rel_error(dx, dx_num))
 print('dw error: ', rel_error(dw, dw_num))
 print('db error: ', rel_error(db, db_num))
-
-"""## 1.3 Pooling
+"""
+## 1.3 Pooling
 
 Now, we implement pooling, max-pooling to be specific. Again, **no** use of vector/matrix multiplications.
 
 ### 1.3.1 Pooling Feedforward
 """
+
 
 def max_pool_forward_naive(x, stride, PH, PW):
     """
@@ -244,6 +249,7 @@ def max_pool_forward_naive(x, stride, PH, PW):
     cache = (x, stride, PH, PW)
     return out, cache
 
+
 """### 1.3.2 Pooling Feedforward Check
 
 You should observe ~$10^{-8}$ difference.
@@ -255,27 +261,22 @@ stride, PH, PW = (2, 2, 2)
 
 out, _ = max_pool_forward_naive(x, stride, PH, PW)
 
-correct_out = np.array([[[[-0.26315789, -0.24842105],
-                          [-0.20421053, -0.18947368]],
-                         [[-0.14526316, -0.13052632],
-                          [-0.08631579, -0.07157895]],
-                         [[-0.02736842, -0.01263158],
-                          [ 0.03157895,  0.04631579]]],
-                        [[[ 0.09052632,  0.10526316],
-                          [ 0.14947368,  0.16421053]],
-                         [[ 0.20842105,  0.22315789],
-                          [ 0.26736842,  0.28210526]],
-                         [[ 0.32631579,  0.34105263],
-                          [ 0.38526316,  0.4       ]]]])
+correct_out = np.array([[[[-0.26315789, -0.24842105], [-0.20421053, -0.18947368]],
+                         [[-0.14526316, -0.13052632], [-0.08631579, -0.07157895]],
+                         [[-0.02736842, -0.01263158], [0.03157895, 0.04631579]]],
+                        [[[0.09052632, 0.10526316], [0.14947368, 0.16421053]],
+                         [[0.20842105, 0.22315789], [0.26736842, 0.28210526]],
+                         [[0.32631579, 0.34105263], [0.38526316, 0.4]]]])
 
 # Compare your output with ours. Difference should be on the order of e-8.
 print('Testing max_pool_forward_naive function:')
 print('difference: ', rel_error(out, correct_out))
-
-"""### 1.3.3 Pooling Gradient
+"""
+### 1.3.3 Pooling Gradient
 
 Again, **no** use of vector/matrix multiplications.
 """
+
 
 def max_pool_backward_naive(dout, cache):
     """
@@ -295,6 +296,7 @@ def max_pool_backward_naive(dout, cache):
     #                             END OF YOUR CODE                            #
     ###########################################################################
     return dx
+
 
 """### 1.3.4 Pooling Gradient Check
 
