@@ -114,7 +114,8 @@ def conv_forward_naive(x, w, b, stride, padding):
                     h_end = h_start + FH
                     w_start = w_out * stride
                     w_end = w_start + FW
-                    out[n, f, h_out, w_out] = np.sum(x_pad[n, :, h_start:h_end, w_start:w_end] * w[f, :, :, :]) + b[f]
+                    out[n, f, h_out,
+                        w_out] = np.sum(x_pad[n, :, h_start:h_end, w_start:w_end] * w[f, :, :, :]) + b[f]
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -367,7 +368,8 @@ def max_pool_backward_naive(dout, cache):
                     w_end = w_start + PW
                     x_pooling_region = x[n, c, h_start:h_end, w_start:w_end]
                     max_val = np.max(x_pooling_region)
-                    dx[n, c, h_start:h_end, w_start:w_end] += (x_pooling_region == max_val) * dout[n, c, h_out, w_out]
+                    dx[n, c, h_start:h_end,
+                       w_start:w_end] += (x_pooling_region == max_val) * dout[n, c, h_out, w_out]
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
