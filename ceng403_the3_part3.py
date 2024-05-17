@@ -32,24 +32,21 @@ OrigResNet18 = None
 # Hint: This should be a single function call.            #
 ###########################################################
 
-
 ###########################################################
 #                         END OF YOUR CODE                #
 ###########################################################
 print(OrigResNet18)
-
 """### 3.1.2 Get ImageNet Labels
 
 Before we finetune ResNet18, let us see what it predicts on CIFAR10. To be able to do so, we will require the list of ImageNet labels.
 """
 
 # Download ImageNet labels
-!wget -nc https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt
+#!wget -nc https://raw.githubusercontent.com/pytorch/hub/master/imagenet_classes.txt
 
 # Read the categories
 with open("imagenet_classes.txt", "r") as f:
     categories = [s.strip() for s in f.readlines()]
-
 """### 3.1.3 Load CIFAR10
 
 As we mentioned above, ResNet18 expects images with resolution 224x224 and normalized with a mean & std. Therefore, while loading CIFAR10, we will apply certain transformations to handle these requirements. (Note that this cell is slightly different than 2.3)
@@ -65,16 +62,12 @@ TF = transforms.Compose([
 ])
 
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=TF)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                          shuffle=True, num_workers=2)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
 
 testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=TF)
-testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
-                                         shuffle=False, num_workers=2)
+testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
 
-CIFAR10_classes = ('plane', 'car', 'bird', 'cat',
-           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
+CIFAR10_classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 """### 3.1.4 Apply Pre-trained ResNet18 on CIFAR10
 
 Let us look at what ResNet18 predicts on a batch of CIFAR10. For a set of samples, we will visualize the images and look at ResNet18's top predictions.
@@ -92,20 +85,19 @@ with torch.no_grad():
 probabilities = torch.nn.functional.softmax(output, dim=1)
 
 # Show results on a 2x2 grid
-S=2
+S = 2
 for i in range(S):
-  for j in range(S):
-    X = images[i*S+j]
-    X = np.transpose((X.numpy()/2+0.5), (1, 2, 0))
-    top1_prob, top1_catid = torch.topk(probabilities[i*S+j], 1)
-    title = "{} p:{:1.2f}".format(categories[top1_catid], top1_prob.item())
+    for j in range(S):
+        X = images[i * S + j]
+        X = np.transpose((X.numpy() / 2 + 0.5), (1, 2, 0))
+        top1_prob, top1_catid = torch.topk(probabilities[i * S + j], 1)
+        title = "{} p:{:1.2f}".format(categories[top1_catid], top1_prob.item())
 
-    plt.subplot(S, S, i*S+j+1)
-    plt.imshow(X)
-    plt.axis('off')
-    plt.title(title)
-    plt.subplots_adjust(hspace = 0.5)
-
+        plt.subplot(S, S, i * S + j + 1)
+        plt.imshow(X)
+        plt.axis('off')
+        plt.title(title)
+        plt.subplots_adjust(hspace=0.5)
 """We see that the predictions are way off and we will hopefully get better results with some finetuning.
 
 ## 3.2 Adapt ResNet18 for CIFAR10
@@ -115,8 +107,8 @@ We will "freeze" the parameters of ResNet18 and replace the last layer of ResNet
 
 # Copy ResNet18
 import copy
-NewResNet18 = copy.deepcopy(OrigResNet18)
 
+NewResNet18 = copy.deepcopy(OrigResNet18)
 """### 3.2.1 Freeze Parameters of ResNet18
 
 We "freeze" a parameter by setting its `requires_grad` member variable to `False`.
@@ -129,11 +121,9 @@ We "freeze" a parameter by setting its `requires_grad` member variable to `False
 # Hint: Check parameters() member function of NewResNet18.#
 ###########################################################
 
-
 ###########################################################
 #                         END OF YOUR CODE                #
 ###########################################################
-
 """### 3.2.2 Add a New Learnable FC Layer to ResNet18
 
 If you look at the summary of ResNet18 shown above, you will see that the last layer is:
@@ -151,18 +141,15 @@ NewResNet18.fc = None
 # classes.                                                #
 ###########################################################
 
-
 ###########################################################
 #                         END OF YOUR CODE                #
 ###########################################################
-
 """### 3.2.3 Visualize the Model
 
 Now, let us see whether the new fc layer is correct for CIFAR10.
 """
 
 print(NewResNet18.fc)
-
 """## 3.3 Finetune ResNet18
 
 While finetuning ResNet18, we will just update the last layer.
@@ -172,42 +159,46 @@ While finetuning ResNet18, we will just update the last layer.
 This is the same training method from Task 2.
 """
 
+
 def train(model, criterion, optimizer, epochs, dataloader, verbose=True):
-  """
+    """
     Define the trainer function. We can use this for training any model.
     The parameter names are self-explanatory.
 
     Returns: the loss history.
   """
-  loss_history = []
-  for epoch in range(epochs):
-    for i, data in enumerate(dataloader, 0):
+    loss_history = []
+    for epoch in range(epochs):
+        for i, data in enumerate(dataloader, 0):
 
-      # Our batch:
-      inputs, labels = data
-      inputs = inputs.to(device)
-      labels = labels.to(device)
+            # Our batch:
+            inputs, labels = data
+            inputs = inputs.to(device)
+            labels = labels.to(device)
 
-      # zero the gradients as PyTorch accumulates them
-      optimizer.zero_grad()
+            # zero the gradients as PyTorch accumulates them
+            optimizer.zero_grad()
 
-      # Obtain the scores
-      outputs = model(inputs)
+            # Obtain the scores
+            outputs = model(inputs)
 
-      # Calculate loss
-      loss = criterion(outputs.to(device), labels)
+            # Calculate loss
+            loss = criterion(outputs.to(device), labels)
 
-      # Backpropagate
-      loss.backward()
+            # Backpropagate
+            loss.backward()
 
-      # Update the weights
-      optimizer.step()
+            # Update the weights
+            optimizer.step()
 
-      loss_history.append(loss.item())
+            loss_history.append(loss.item())
 
-    if verbose: print(f'Epoch {epoch} / {epochs}: avg. loss of last 5 iterations {np.sum(loss_history[:-6:-1])/5}')
+        if verbose:
+            print(
+                f'Epoch {epoch} / {epochs}: avg. loss of last 5 iterations {np.sum(loss_history[:-6:-1])/5}')
 
-  return loss_history
+    return loss_history
+
 
 """### 3.3.2 Finetune the Adapted ResNet18 on CIFAR10
 
@@ -226,10 +217,10 @@ NewResNet18.fc = None
 # @TODO: Repeat what you did in 3.2.2 here                  #
 ###########################################################
 
-
 ###########################################################
 #                         END OF YOUR CODE                #
 ###########################################################
+
 
 def get_learnable_parameters(model):
     params_to_update = []
@@ -238,6 +229,7 @@ def get_learnable_parameters(model):
             params_to_update.append(param)
     return params_to_update
 
+
 parameters_to_update = get_learnable_parameters(NewResNet18)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(parameters_to_update, lr=0.0001, momentum=0.95)
@@ -245,7 +237,6 @@ optimizer = optim.SGD(parameters_to_update, lr=0.0001, momentum=0.95)
 NewResNet18 = NewResNet18.to(device)
 epochs = 2
 loss_history = train(NewResNet18, criterion, optimizer, epochs, trainloader)
-
 """### 3.3.3 The Loss Curve
 
 You will see that the loss curve is very noisy, which suggests that we should finetune our hyper-parameters. Though, we will see that we get already reasonably well performance on test data.
@@ -255,7 +246,6 @@ plt.plot(loss_history)
 plt.xlabel('Iteration number')
 plt.ylabel('Loss value')
 plt.show()
-
 """### 3.3.4 Quantitative Results
 
 We can analyze the accuracy of the predictions as follows. You should see around 69\% accuracies. We can finetune the hyperparameters to obtain better results.
@@ -278,9 +268,7 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
-print('Accuracy of the network on the 10000 test images: %d %%' % (
-    100 * correct / total))
-
+print('Accuracy of the network on the 10000 test images: %d %%' % (100 * correct / total))
 """### 3.3.5 Visual Results
 
 We see that with just two epochs of training a single FC layer, we can get decent results.
@@ -300,16 +288,16 @@ with torch.no_grad():
 probabilities = torch.nn.functional.softmax(output, dim=1)
 
 # Show results on a 2x2 grid
-S=2
+S = 2
 for i in range(S):
-  for j in range(S):
-    X = images[i*S+j]
-    X = np.transpose((X.to("cpu").numpy()/2+0.5), (1, 2, 0))
-    top1_prob, top1_catid = torch.topk(probabilities[i*S+j], 1)
-    title = "{} p:{:1.2f}".format(CIFAR10_classes[top1_catid], top1_prob.item())
+    for j in range(S):
+        X = images[i * S + j]
+        X = np.transpose((X.to("cpu").numpy() / 2 + 0.5), (1, 2, 0))
+        top1_prob, top1_catid = torch.topk(probabilities[i * S + j], 1)
+        title = "{} p:{:1.2f}".format(CIFAR10_classes[top1_catid], top1_prob.item())
 
-    plt.subplot(S, S, i*S+j+1)
-    plt.imshow(X)
-    plt.axis('off')
-    plt.title(title)
-    plt.subplots_adjust(hspace = 0.5)
+        plt.subplot(S, S, i * S + j + 1)
+        plt.imshow(X)
+        plt.axis('off')
+        plt.title(title)
+        plt.subplots_adjust(hspace=0.5)
