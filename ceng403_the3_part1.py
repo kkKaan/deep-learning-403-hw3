@@ -31,8 +31,8 @@ def conv_forward_naive(x, w, b, stride, padding):
 
     Returns a tuple of:
     - out: Output data, of shape (N, F, H', W') where H' and W' are given by
-        H' = 1 + (H + 2 * padding - FH) / stride
-        W' = 1 + (W + 2 * padding - FW) / stride
+      H' = 1 + (H + 2 * padding - FH) / stride
+      W' = 1 + (W + 2 * padding - FW) / stride
     - cache: (x_pad, w, b, stride, padding)
     """
 
@@ -80,11 +80,29 @@ def conv_forward_naive(x, w, b, stride, padding):
             for h_out in range(H_out):
                 for w_out in range(W_out):
                     h_start = h_out * stride
-                    h_end = h_start + FH
+                    # h_end = h_start + FH
                     w_start = w_out * stride
-                    w_end = w_start + FW
-                    out[n, f, h_out,
-                        w_out] = np.sum(x_pad[n, :, h_start:h_end, w_start:w_end] * w[f, :, :, :]) + b[f]
+                    # w_end = w_start + FW
+
+                    # out[n, f, h_out,
+                    #     w_out] = np.sum(x_pad[n, :, h_start:h_end, w_start:w_end] * w[f, :, :, :]) + b[f]
+
+                    # print(out[n, f, h_out, w_out])
+                    # print(x_pad[n, :, h_start:h_end, w_start:w_end].shape)
+                    # print(w[f, :, :, :].shape)
+                    # print(b[f])
+
+                    # Initialize the convolution sum
+                    conv_sum = 0.0
+
+                    for c in range(C):
+                        for h in range(FH):
+                            for wn in range(FW):
+                                conv_sum += x_pad[n, c, h_start + h, w_start + wn] * w[f, c, h, wn]
+                                # print(x_pad[n, c, h_start + h, w_start + wn], w[f, c, h, wn])
+                                # print(type(x_pad[n, c, h_start + h, w_start + wn]), type(w[f, c, h, wn]))
+
+                    out[n, f, h_out, w_out] = conv_sum + b[f]
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -125,15 +143,39 @@ def conv_backward_naive(dout, cache):
     # Compute gradients
     for n in range(N):
         for f in range(F):
-            db[f] += np.sum(dout[n, f])
+            # Vectorized version
+            # db[f] += np.sum(dout[n, f])
+            # print(dout[n, f].shape)
+
+            # Find db gradient with loops only
+            for h_out in range(H_out):
+                for w_out in range(W_out):
+                    db[f] += dout[n, f, h_out, w_out]
+                    # print(dout[n, f, h_out, w_out])
+
             for h_out in range(H_out):
                 for w_out in range(W_out):
                     h_start = h_out * stride
-                    h_end = h_start + FH
+                    # h_end = h_start + FH
                     w_start = w_out * stride
-                    w_end = w_start + FW
-                    dx[n, :, h_start:h_end, w_start:w_end] += dout[n, f, h_out, w_out] * w[f, :, :, :]
-                    dw[f, :, :, :] += dout[n, f, h_out, w_out] * x_pad[n, :, h_start:h_end, w_start:w_end]
+                    # w_end = w_start + FW
+
+                    # Vectorized version
+                    # dx[n, :, h_start:h_end, w_start:w_end] += dout[n, f, h_out, w_out] * w[f, :, :, :]
+                    # dw[f, :, :, :] += dout[n, f, h_out, w_out] * x_pad[n, :, h_start:h_end, w_start:w_end]
+
+                    # Find dx and dw gradients with loops only
+                    for c in range(C):
+                        for h in range(FH):
+                            for wn in range(FW):
+                                dx[n, c, h_start + h,
+                                   w_start + wn] += dout[n, f, h_out, w_out] * w[f, c, h, wn]
+                                # print(dout[n, f, h_out, w_out], w[f, c, h, wn])
+                                # print(type(dout[n, f, h_out, w_out]), type(w[f, c, h, wn]))
+                                dw[f, c, h,
+                                   wn] += dout[n, f, h_out, w_out] * x_pad[n, c, h_start + h, w_start + wn]
+                                # print(dout[n, f, h_out, w_out], x_pad[n, c, h_start + h, w_start + wn])
+                                # print(type(dout[n, f, h_out, w_out]), type(x_pad[n, c, h_start + h, w_start + wn]))
 
     # Remove padding from dx
     dx = dx[:, :, padding:-padding, padding:-padding]
@@ -198,10 +240,20 @@ def max_pool_forward_naive(x, stride, PH, PW):
             for h_out in range(H_out):
                 for w_out in range(W_out):
                     h_start = h_out * stride
-                    h_end = h_start + PH
+                    # h_end = h_start + PH
                     w_start = w_out * stride
-                    w_end = w_start + PW
-                    out[n, c, h_out, w_out] = np.max(x[n, c, h_start:h_end, w_start:w_end])
+                    # w_end = w_start + PW
+
+                    # Vectorized version
+                    # out[n, c, h_out, w_out] = np.max(x[n, c, h_start:h_end, w_start:w_end])
+
+                    # Find max pooling with loops only
+                    max_val = -np.inf
+                    for h in range(PH):
+                        for w in range(PW):
+                            max_val = max(max_val, x[n, c, h_start + h, w_start + w])
+
+                    out[n, c, h_out, w_out] = max_val
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -235,13 +287,28 @@ def max_pool_backward_naive(dout, cache):
             for h_out in range(H_out):
                 for w_out in range(W_out):
                     h_start = h_out * stride
-                    h_end = h_start + PH
+                    # print(h_start, h_out, stride)
+                    # h_end = h_start + PH
                     w_start = w_out * stride
-                    w_end = w_start + PW
-                    x_pooling_region = x[n, c, h_start:h_end, w_start:w_end]
-                    max_val = np.max(x_pooling_region)
-                    dx[n, c, h_start:h_end,
-                       w_start:w_end] += (x_pooling_region == max_val) * dout[n, c, h_out, w_out]
+                    # print(w_start, w_out, stride)
+                    # w_end = w_start + PW
+
+                    # Vectorized version
+                    # x_pooling_region = x[n, c, h_start:h_end, w_start:w_end]
+                    # max_val = np.max(x_pooling_region)
+                    # dx[n, c, h_start:h_end, w_start:w_end] += (x_pooling_region == max_val) * dout[n, c, h_out, w_out]
+
+                    # Find max pooling gradient with loops only
+                    max_val = -np.inf
+                    for h in range(PH):
+                        for w in range(PW):
+                            max_val = max(max_val, x[n, c, h_start + h, w_start + w])
+                            # print(type(x[n, c, h_start + h, w_start + w]), type(max_val))
+                    for h in range(PH):
+                        for w in range(PW):
+                            if x[n, c, h_start + h, w_start + w] == max_val:
+                                dx[n, c, h_start + h, w_start + w] += dout[n, c, h_out, w_out]
+                                # print(type(dx[n, c, h_start + h, w_start + w]), type(dout[n, c, h_out, w_out]))
 
     ###########################################################################
     #                             END OF YOUR CODE                            #
