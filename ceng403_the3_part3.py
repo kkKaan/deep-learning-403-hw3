@@ -1,21 +1,3 @@
-"""
-
-In this task, we will practice transfer learning by adapting and finetuning ResNet18 (pretrained on ImageNet) for CIFAR10.
-
-## 3.1 Download and Test Pretrained ResNet18
-
-We have talked about ResNet in detail in the lectures. We will take Pytorch's ResNet18 model (https://pytorch.org/hub/pytorch_vision_resnet/), 
-which was trained on ImageNet, and adapt & finetune it for CIFAR10.
-
-Here are a couple of critical information about ResNet18's input (from Pytorch docs):
-
-<i>"All pre-trained models expect input images normalized in the same way, i.e. mini-batches of 3-channel RGB images of shape 
-    (3 x H x W), where H and W are expected to be at least 224. The images have to be loaded in to a range of [0, 1] and 
-    then normalized using mean = [0.485, 0.456, 0.406] and std = [0.229, 0.224, 0.225]."</i>
-
-### 3.1.1 Download ResNet18
-"""
-
 # Thanks to Pytorch datasets, this is very easy:
 
 OrigResNet18 = None

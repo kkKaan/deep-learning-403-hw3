@@ -1,15 +1,3 @@
-"""
-# CENG403 - Spring 2024 - THE3
-
-# Task 2: CNN with PyTorch
-In this task, you will implement a convolutional neural network (CNN) with PyTorch.
-
-## 2.1 Import the Modules
-
-Let us start with importing some libraries that we will use throughout the task.
-"""
-
-# PyTorch libraries:
 import torch
 import torchvision
 import torchvision.transforms as transforms
@@ -20,11 +8,6 @@ from torchinfo import summary
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-"""
-## 2.2 Enable GPU
-
-First, under "Edit -> Notebook Settings -> Hardware accelerator", select a GPU. With the following, we will inform PyTorch that we want to use the GPU.
-"""
 
 if torch.cuda.is_available():
     print("Cuda (GPU support) is available and enabled!")
